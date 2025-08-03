@@ -67,7 +67,7 @@
 // --- Credenciales y Endpoints ---
 const char* ssid = "Wifi Montoya";
 const char* password = "8A8960WM59";
-const char* backendUrl = "http://192.168.100.60:8000/datos/"; // Usa tu IP correcta
+const char* backendUrl = "http://192.168.100.6:8000/datos/"; // Usa tu IP correcta
 
 // --- Configuración de Hardware LoRa (Asegúrate que coincida con tu placa) ---
 #define LORA_CS_PIN   10
@@ -83,16 +83,18 @@ SX1262 radio = new Module(LORA_CS_PIN, LORA_DIO1_PIN, LORA_RST_PIN, LORA_BUSY_PI
 
 // --- Definir el "molde" de datos (DEBE SER IDÉNTICO AL DEL MÓDULO CORREDOR) ---
 struct RastroData {
-  uint8_t ciclista_id;
-  float lat;
-  float lng;
-  float spd;
-  float accel_x;
-  float accel_y;
-  float accel_z;
-  float gyro_x;
-  float gyro_y;
-  float gyro_z;
+    uint32_t timestamp;   // 4 bytes
+    int32_t latitude;     // 4 bytes
+    int32_t longitude;    // 4 bytes
+    uint16_t battery_mv;  // 2 bytes
+    uint16_t speed_cmps;  // 2 bytes
+    uint8_t satellites;   // 1 byte
+    uint8_t hdop_x10;     // 1 byte
+    int16_t accel_x;      // 2 bytes
+    int16_t accel_y;      // 2 bytes
+    int16_t accel_z;      // 2 bytes
+    uint8_t racer_id;    // 1 byte
+    uint8_t flags;        // 1 byte
 };
 
 void setup() {
@@ -132,23 +134,56 @@ void loop() {
     int state = radio.readData((uint8_t*)&dataPacket, sizeof(dataPacket));
 
     if (state == RADIOLIB_ERR_NONE) {
-        Serial.printf("Paquete binario recibido de ciclista #%d\n", dataPacket.ciclista_id);
-        Serial.printf("  Lat: %.4f, Lng: %.4f, Spd: %.2f\n", dataPacket.lat, dataPacket.lng, dataPacket.spd);
+        Serial.printf("Paquete binario recibido de ciclista #%d\n", dataPacket.racer_id);
+        // Serial.printf("  Lat: %.4f, Lng: %.4f, Spd: %.2f\n", dataPacket.lat, dataPacket.lng, dataPacket.spd);
+
+        // Convertimos a tipos legibles
+        float lat = dataPacket.latitude / 1e7;
+        float lng = dataPacket.longitude / 1e7;
+        float speed = dataPacket.speed_cmps / 100.0;
+        float hdop = dataPacket.hdop_x10 / 10.0;
+        float accelX = dataPacket.accel_x / 1000.0;
+        float accelY = dataPacket.accel_y / 1000.0;
+        float accelZ = dataPacket.accel_z / 1000.0;
+        float battery = dataPacket.battery_mv / 1000.0;
+        float gyro_x = 0;        // 4 bytes
+        float gyro_y = 0;        // 4 bytes
+        float gyro_z = 0;      // 4 bytes
+        // Serial debug opcional
+        Serial.printf("  Lat: %.6f, Lng: %.6f, Vel: %.2f m/s\n", lat, lng, speed);
+
+        // Crear JSON
+        StaticJsonDocument<256> jsonDoc;
+        jsonDoc["ciclista_id"] = "ciclista" + String(dataPacket.racer_id);
+        jsonDoc["lat"] = lat;
+        jsonDoc["lng"] = lng;
+        jsonDoc["spd"] = speed;
+        jsonDoc["accel_x"] = accelX;
+        jsonDoc["accel_y"] = accelY;
+        jsonDoc["accel_z"] = accelZ;
+        jsonDoc["gyro_x"] = gyro_x;
+        jsonDoc["gyro_y"] = gyro_y;
+        jsonDoc["gyro_z"] = gyro_z; 
+        // jsonDoc["battery"] = battery;
+        // jsonDoc["hdop"] = hdop;
+        // jsonDoc["satellites"] = dataPacket.satellites;
+        // jsonDoc["timestamp"] = dataPacket.timestamp;
+    
 
         // 3. Crear el documento JSON a partir del molde
-        StaticJsonDocument<256> jsonDoc;
-        // Usamos .set() para añadir los valores del struct al JSON.
-        // ¡Las claves deben coincidir con lo que espera tu API en Python!
-        jsonDoc["ciclista_id"] = "ciclista" + String(dataPacket.ciclista_id);
-        jsonDoc["lat"] = dataPacket.lat;
-        jsonDoc["lng"] = dataPacket.lng;
-        jsonDoc["spd"] = dataPacket.spd;
-        jsonDoc["accel_x"] = dataPacket.accel_x;
-        jsonDoc["accel_y"] = dataPacket.accel_y;
-        jsonDoc["accel_z"] = dataPacket.accel_z;
-        jsonDoc["gyro_x"] = dataPacket.gyro_x;
-        jsonDoc["gyro_y"] = dataPacket.gyro_y;
-        jsonDoc["gyro_z"] = dataPacket.gyro_z;
+        // StaticJsonDocument<256> jsonDoc;
+        // // Usamos .set() para añadir los valores del struct al JSON.
+        // // ¡Las claves deben coincidir con lo que espera tu API en Python!
+        // jsonDoc["ciclista_id"] = "ciclista" + String(dataPacket.ciclista_id);
+        // jsonDoc["lat"] = dataPacket.lat;
+        // jsonDoc["lng"] = dataPacket.lng;
+        // jsonDoc["spd"] = dataPacket.spd;
+        // jsonDoc["accel_x"] = dataPacket.accel_x;
+        // jsonDoc["accel_y"] = dataPacket.accel_y;
+        // jsonDoc["accel_z"] = dataPacket.accel_z;
+        // jsonDoc["gyro_x"] = dataPacket.gyro_x;
+        // jsonDoc["gyro_y"] = dataPacket.gyro_y;
+        // jsonDoc["gyro_z"] = dataPacket.gyro_z;
 
         String jsonPayload;
         serializeJson(jsonDoc, jsonPayload); // Convertir el documento a un String
