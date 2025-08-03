@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app import models, llm_utils, alert_engine
-from app.schemas import AnalisisRequest
+import models, llm_utils, alert_engine
+from schemas import AnalisisRequest
 import uvicorn
 
 app = FastAPI(title="Ciclismo LLM Tracking", version="1.0")
@@ -105,4 +105,4 @@ async def analisis_llm(data: AnalisisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("app.main_fastapi:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main_fastapi:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,4 +1,4 @@
-from app import models, llm_utils
+import models, llm_utils
 
 ACCEL_UMBRAL = 15  # m/s², vibración muy alta
 GYRO_UMBRAL = 300  # deg/s, inclinación peligrosa

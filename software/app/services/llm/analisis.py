@@ -1,4 +1,4 @@
-from app.models import obtener_todos_datos
+from models import obtener_todos_datos
 from .llm_client import consultar_llm
 from .llm_validation import validar_llm_respuesta
 from .prompt_builder import (
