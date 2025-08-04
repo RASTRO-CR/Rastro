@@ -1,62 +1,3 @@
-// #include <Arduino.h>
-// #include <WiFi.h>
-// #include <HTTPClient.h>
-
-// const char* ssid = "Wifi Montoya";
-// const char* password = "8A8960WM59";
-// const char* backendUrl = "http://192.168.100.60:8000/datos/";
-
-// void setup() {
-//   Serial.begin(115200);
-//   delay(1000);
-
-//   WiFi.mode(WIFI_STA);
-//   WiFi.begin(ssid, password);
-//   Serial.print("Conectando a WiFi...");
-//   while (WiFi.status() != WL_CONNECTED) {
-//     delay(1000);
-//     Serial.print(".");
-//   }
-//   Serial.println("\nWiFi conectado");
-// }
-
-// void loop() {
-//   if (WiFi.status() == WL_CONNECTED) {
-//     HTTPClient http;
-//     http.begin(backendUrl);
-//     http.addHeader("Content-Type", "application/json");
-
-//     String json = R"({
-//       "ciclista_id": "ciclista123",
-//       "lat": 10.001,
-//       "lng": -84.123,
-//       "spd": 12.4,
-//       "accel_x": 0.02,
-//       "accel_y": -0.01,
-//       "accel_z": 0.98,
-//       "gyro_x": 0.1,
-//       "gyro_y": -0.1,
-//       "gyro_z": 0.05
-//     })";
-
-//     int httpResponseCode = http.POST(json);
-//     if (httpResponseCode > 0) {
-//       String response = http.getString();
-//       Serial.println("Respuesta del backend:");
-//       Serial.println(response);
-//     } else {
-//       Serial.print("Error en la solicitud: ");
-//       Serial.println(httpResponseCode);
-//     }
-
-//     http.end();
-//   } else {
-//     Serial.println("WiFi desconectado");
-//   }
-
-//   delay(5000);  // Esperar 5 segundos antes de enviar nuevamente
-// }
-
 
 #include <Arduino.h>
 #include <RadioLib.h>
@@ -65,21 +6,22 @@
 #include <ArduinoJson.h> // <-- Incluimos la librería JSON
 
 // --- Credenciales y Endpoints ---
-const char* ssid = "Wifi Montoya";
-const char* password = "8A8960WM59";
-const char* backendUrl = "http://192.168.100.6:8000/datos/"; // Usa tu IP correcta
+const char* ssid = "Apart. Brisas del Este AP1";
+const char* password = "monica789";
+const char* backendUrl = "http://192.168.60.42:8000/datos/"; // Usa tu IP correcta
 
-// --- Configuración de Hardware LoRa (Asegúrate que coincida con tu placa) ---
-#define LORA_CS_PIN   10
-#define LORA_DIO1_PIN 1
-#define LORA_RST_PIN  5
-#define LORA_BUSY_PIN 4
-#define LORA_SCK_PIN  12
-#define LORA_MISO_PIN 13
-#define LORA_MOSI_PIN 11
+// --- PINES ESP32 ---
+// --- PASO 1: Pines corregidos para tu montaje en Protoboard ---
+#define LORA_CS_PIN   5
+#define LORA_DIO1_PIN 4
+#define LORA_RST_PIN  17
+#define LORA_BUSY_PIN 16
+// Los pines SPI (18, 19, 23) son manejados por defecto, no necesitamos definirlos.
 
-SPIClass spi_lora(HSPI);
-SX1262 radio = new Module(LORA_CS_PIN, LORA_DIO1_PIN, LORA_RST_PIN, LORA_BUSY_PIN, spi_lora);
+// --- PASO 2: Simplificación del objeto de radio ---
+// Ya no necesitamos un SPIClass personalizado. RadioLib usará el SPI por defecto.
+SX1262 radio = new Module(LORA_CS_PIN, LORA_DIO1_PIN, LORA_RST_PIN, LORA_BUSY_PIN);
+
 
 // --- Definir el "molde" de datos (DEBE SER IDÉNTICO AL DEL MÓDULO CORREDOR) ---
 struct RastroData {
@@ -114,8 +56,18 @@ void setup() {
     Serial.print("IP: ");
     Serial.println(WiFi.localIP());
 
+
+    //  // --- LA SOLUCIÓN: RESET MANUAL DEL MÓDULO LORA ---
+    // Serial.println("Realizando reset manual del módulo LoRa...");
+    // pinMode(LORA_RST_PIN, OUTPUT);
+    // digitalWrite(LORA_RST_PIN, LOW);
+    // delay(10); // Pulso de reset corto
+    // digitalWrite(LORA_RST_PIN, HIGH);
+    // delay(10); // Pausa para que el chip se estabilice
+    // Serial.println("Reset completado.");
+
     // Inicializar LoRa
-    spi_lora.begin(LORA_SCK_PIN, LORA_MISO_PIN, LORA_MOSI_PIN, LORA_CS_PIN);
+    // spi_lora.begin(LORA_SCK_PIN, LORA_MISO_PIN, LORA_MOSI_PIN, LORA_CS_PIN);
     int state = radio.begin(915.0, 125.0, 9, 7);
     if (state != RADIOLIB_ERR_NONE) {
         Serial.printf("Fallo al iniciar LoRa, código: %d\n", state);
@@ -200,9 +152,10 @@ void loop() {
             int httpResponseCode = http.POST(jsonPayload);
 
             if (httpResponseCode > 0) {
-                Serial.printf("Respuesta del backend: %d\n", httpResponseCode);
-                String response = http.getString();
-                Serial.println(response);
+                // Serial.printf("Respuesta del backend: %d\n", httpResponseCode);
+                // String response = http.getString();
+                // Serial.println(response);
+                Serial.println("Solicitud enviada correctamente.");
             } else {
                 Serial.printf("Error en la solicitud: %s\n", http.errorToString(httpResponseCode).c_str());
             }
@@ -216,3 +169,172 @@ void loop() {
         Serial.printf("Fallo al recibir, código: %d\n", state);
     }
 }
+
+
+
+
+
+
+// #include <Arduino.h>
+// #include <SPI.h>
+
+// // --- Usamos los pines de tu montaje ---
+// // Bus SPI por defecto (VSPI)
+// #define SPI_CLK  18
+// #define SPI_MISO 19
+// #define SPI_MOSI 23
+// #define LORA_CS  5 // Chip Select
+
+// void setup() {
+//   Serial.begin(115200);
+//   while (!Serial && millis() < 2000);
+//   Serial.println("\n--- INICIANDO ESCÁNER SPI PARA SX1262 ---");
+
+//   // Configurar el pin Chip Select como salida
+//   pinMode(LORA_CS, OUTPUT);
+//   digitalWrite(LORA_CS, HIGH); // Mantenerlo inactivo (en alto)
+
+//   // Iniciar el bus SPI con los pines por defecto
+//   SPI.begin(SPI_CLK, SPI_MISO, SPI_MOSI, -1); // -1 para manejar CS manualmente
+
+//   Serial.println("Bus SPI inicializado. Intentando comunicar con el chip...");
+// }
+
+// void loop() {
+//   // Vamos a intentar leer un registro del SX1262.
+//   // Usaremos el comando NOP (No Operation) que debería devolver el estado.
+  
+//   byte cmd = 0x80; // Comando NOP para SX1262
+  
+//   // 1. Activar el chip LoRa (poner CS en BAJO)
+//   digitalWrite(LORA_CS, LOW);
+  
+//   // 2. Transferir el comando y recibir la respuesta
+//   byte statusByte = SPI.transfer(cmd);
+  
+//   // 3. Desactivar el chip LoRa (poner CS en ALTO)
+//   digitalWrite(LORA_CS, HIGH);
+
+//   Serial.print("Comando 0x80 enviado. Respuesta recibida: 0x");
+//   if (statusByte < 0x10) {
+//     Serial.print("0"); // Añadir cero para formato
+//   }
+//   Serial.println(statusByte, HEX);
+
+//   delay(2000); // Esperar 2 segundos
+// }
+
+
+
+
+
+// #include <Arduino.h>
+// #include <RadioLib.h>
+// #include <SPI.h> // Necesario para la configuración explícita de SPI
+
+// // --- Pines para tu montaje en Protoboard ---
+// #define LORA_CS_PIN   5
+// #define LORA_DIO1_PIN 4
+// #define LORA_RST_PIN  17
+// #define LORA_BUSY_PIN 16
+// #define SPI_CLK  18
+// #define SPI_MISO 19
+// #define SPI_MOSI 23
+
+// // Usamos el SPI por defecto, pero lo configuraremos manualmente
+// SX1262 radio = new Module(LORA_CS_PIN, LORA_DIO1_PIN, LORA_RST_PIN, LORA_BUSY_PIN);
+
+// // --- Configuración SPI "Paranoica": 1MHz, Modo 0 ---
+// // Esto es lento pero extremadamente fiable, ideal para protoboards.
+// SPISettings spiSettings(1000000, MSBFIRST, SPI_MODE0);
+
+// void setup() {
+//     Serial.begin(115200);
+//     while (!Serial && millis() < 2000);
+//     Serial.println("\n--- MÓDULO CC RASTRO (Modo Paranoico) ---");
+
+//     // --- Inicialización manual y explícita de SPI ---
+//     SPI.begin(SPI_CLK, SPI_MISO, SPI_MOSI, -1);
+//     Serial.println("Bus SPI inicializado manualmente.");
+
+//     // --- Reset manual del módulo LoRa ---
+//     Serial.println("Realizando reset manual del módulo LoRa...");
+//     pinMode(LORA_RST_PIN, OUTPUT);
+//     digitalWrite(LORA_RST_PIN, LOW);
+//     delay(10);
+//     digitalWrite(LORA_RST_PIN, HIGH);
+//     delay(10);
+//     Serial.println("Reset completado.");
+
+//     // --- Inicialización de RadioLib con configuración SPI estable ---
+//     Serial.println("Intentando iniciar RadioLib en modo estable...");
+//     SPI.beginTransaction(spiSettings); // Aplicamos nuestra configuración lenta
+    
+//     int state = radio.begin(915.0, 125.0, 9, 7);
+    
+//     SPI.endTransaction(); // Liberamos el bus SPI
+    
+//     if (state != RADIOLIB_ERR_NONE) {
+//         Serial.printf("Fallo al iniciar LoRa, código: %d\n", state);
+//         while (true);
+//     }
+    
+//     Serial.println("¡ÉXITO! ¡Receptor listo! Escuchando paquetes...");
+//     radio.startReceive();
+// }
+
+// void loop() {
+//     // El loop quedará en espera de paquetes, no necesitamos código aquí por ahora.
+//     String str;
+//     int state = radio.readData(str);
+//     if (state == RADIOLIB_ERR_NONE) {
+//         Serial.print("Paquete recibido: '");
+//         Serial.print(str);
+//         Serial.println("'");
+//     }
+// }
+
+
+
+
+
+// FASE 1 PRUEBA DEL BUS SPI Secundario
+// #include <Arduino.h>
+// #include <SPI.h>
+
+// // --- Pines para el bus HSPI ---
+// #define HSPI_CLK  14
+// #define HSPI_MISO 12
+// #define HSPI_MOSI 13
+// #define LORA_CS   15
+
+// // Creamos un objeto para el segundo bus SPI del ESP32
+// SPIClass hspi(HSPI);
+
+// void setup() {
+//   Serial.begin(115200);
+//   while (!Serial && millis() < 2000);
+//   Serial.println("\n--- DIAGNÓSTICO AVANZADO: Bus HSPI ---");
+
+//   pinMode(LORA_CS, OUTPUT);
+//   digitalWrite(LORA_CS, HIGH);
+
+//   // Inicializamos el bus HSPI con sus pines específicos
+//   hspi.begin(HSPI_CLK, HSPI_MISO, HSPI_MOSI, -1);
+//   Serial.println("Bus HSPI inicializado.");
+// }
+
+// void loop() {
+//   byte cmd = 0x80; // Comando NOP (No Operation) para SX1262
+  
+//   digitalWrite(LORA_CS, LOW);
+//   byte statusByte = hspi.transfer(cmd); // Usamos hspi.transfer()
+//   digitalWrite(LORA_CS, HIGH);
+
+//   Serial.print("Comando 0x80 enviado vía HSPI. Respuesta: 0x");
+//   if (statusByte < 0x10) Serial.print("0");
+//   Serial.println(statusByte, HEX);
+
+//   delay(2000);
+// }
+
