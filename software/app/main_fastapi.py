@@ -39,13 +39,21 @@ async def recibir_datos(request: Request):
 
     models.agregar_ciclista(ciclista_id, "Nombre", 0, "Equipo")
     models.insertar_datos(ciclista_id, lat, lng, spd, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z)
-    alerta = alert_engine.verificar_alertas(ciclista_id)
+    # alerta = alert_engine.verificar_alertas(ciclista_id)
 
-    return {"status": "ok", "alerta": alerta}
+    # return {"status": "ok", "alerta": alerta}
+    return {"status": "ok", "msg": "Datos recibidos y almacenados correctamente."}
 
 @app.get("/ciclistas/")
 def listar_ciclistas():
-    return {"ciclistas": models.obtener_todos_ciclistas()}
+    # return {"ciclistas": models.obtener_todos_ciclistas()}
+    # Usamos la nueva función que devuelve los datos completos
+    ciclistas_con_posicion = models.obtener_todos_ciclistas_con_ultima_posicion()
+    # ciclistas_con_posicion = models.obtener_ultimo_dato("ciclista1")
+    # Filtramos a los que no tengan ubicación para no enviar datos nulos
+    ciclistas_validos = [c for c in ciclistas_con_posicion if c.get('lat') is not None and c.get('lng') is not None]
+    return {"ciclistas": ciclistas_validos}
+    # return {"ciclistas": ciclistas_con_posicion}
 
 @app.get("/datos/{ciclista_id}")
 def ultimo_dato(ciclista_id: str):
