@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Activity,
   Settings,
@@ -8,7 +7,6 @@ import {
   Users,
   MapPin,
   Bell,
-  LogOut,
   Menu,
   X,
 } from "lucide-react";

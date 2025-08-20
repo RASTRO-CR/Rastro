@@ -1,7 +1,6 @@
 "use client"
 
 import { EnhancedHeader } from "@/components/enhanced-header"
-import { LiveMap } from "@/components/live-map"
 import { EnhancedRunnerSidebar } from "@/components/enhanced-runner-sidebar"
 import type { Runner } from "@/lib/types"
 
@@ -50,15 +49,6 @@ export function PublicDashboard({
       />
 
       <div className="flex h-[calc(100vh-100px)] gap-4 p-4 relative z-10">
-        <div className="flex-1">
-          <LiveMap
-            runners={runners}
-            selectedRunner={selectedRunner}
-            onRunnerSelect={onRunnerSelect}
-            routeData={routeData}
-          />
-        </div>
-
         <div className="w-96">
           <EnhancedRunnerSidebar runners={runners} onRunnerSelect={onRunnerSelect} selectedRunner={selectedRunner} />
         </div>

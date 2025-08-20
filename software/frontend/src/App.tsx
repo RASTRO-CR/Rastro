@@ -70,7 +70,6 @@ const transformApiDataToRunner = (
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<"race" | "config">("race");
-  const [isAdmin, setIsAdmin] = useState(true);
   const [selectedRunner, setSelectedRunner] = useState<string | null>(null);
   const [routeData, setRouteData] = useState<any>(null);
   const [raceStarted, setRaceStarted] = useState(true);
@@ -187,7 +186,7 @@ export default function Home() {
       <ModernNavbar
         currentPage={currentPage}
         onPageChange={setCurrentPage}
-        isAdmin={isAdmin}
+        isAdmin={true}
         connectionStatus={{
           connected: !error,
           connectionState: error ? "error" : "connected",
@@ -208,7 +207,7 @@ export default function Home() {
             lastUpdate: new Date().toLocaleTimeString(),
           }}
           onRunnerSelect={handleRunnerSelect}
-          isAdmin={isAdmin}
+          isAdmin={true}
         />
       ) : (
         <RaceConfigPage

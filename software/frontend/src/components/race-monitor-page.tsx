@@ -1,6 +1,5 @@
 "use client"
 
-import { LiveMap } from "@/components/live-map"
 import { EnhancedRunnerSidebar } from "@/components/enhanced-runner-sidebar"
 import { RaceMetrics } from "@/components/race-metrics"
 import { AlertsPanel } from "@/components/alerts-panel"

@@ -52,7 +52,7 @@ export function DetailedStats({ runners }: DetailedStatsProps) {
               <h3 className="font-semibold">Speed Distribution</h3>
             </div>
             <div className="space-y-2">
-              {["0-20 km/h", "20-30 km/h", "30-40 km/h", "40+ km/h"].map((range, index) => {
+              {["0-20 km/h", "20-30 km/h", "30-40 km/h", "40+ km/h"].map((range) => {
                 const percentage = Math.random() * 100
                 return (
                   <div key={range}>

@@ -22,7 +22,6 @@ export function RaceConfigPage({
   runners,
   alerts,
   raceStarted,
-  routeData,
   connectionState,
   onStartRace,
   onEndRace,

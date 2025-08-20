@@ -12,7 +12,7 @@ interface SystemStatusProps {
   raceStarted: boolean
 }
 
-export function SystemStatus({ runners, alerts, connectionState, raceStarted }: SystemStatusProps) {
+export function SystemStatus({ runners, alerts, connectionState }: SystemStatusProps) {
   const systemMetrics = {
     cpuUsage: 45,
     memoryUsage: 62,
@@ -26,11 +26,6 @@ export function SystemStatus({ runners, alerts, connectionState, raceStarted }: 
     if (value >= thresholds.critical) return "text-red-400"
     if (value >= thresholds.warning) return "text-amber-400"
     return "text-emerald-400"
-  }
-
-  const getStatusIcon = (value: number, thresholds: { warning: number; critical: number }) => {
-    if (value >= thresholds.critical) return AlertTriangle
-    return CheckCircle
   }
 
   const services = [
