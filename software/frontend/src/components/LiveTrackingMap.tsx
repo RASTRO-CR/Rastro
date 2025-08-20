@@ -12,7 +12,7 @@ import "leaflet/dist/leaflet.css";
 
 // --- CONFIGURACIÓN ---
 const RUNNER_ID_TO_TRACK = "ciclista1"; // <-- ¡Aquí definimos el corredor que nos interesa!
-const API_URL = `http://192.168.60.42:8000/datos/${RUNNER_ID_TO_TRACK}`; // ¡ASEGÚRATE DE QUE ESTA IP SEA CORRECTA!
+const API_URL = `http://192.168.100.60:8000/datos/${RUNNER_ID_TO_TRACK}`; // ¡ASEGÚRATE DE QUE ESTA IP SEA CORRECTA!
 const POLLING_INTERVAL_MS = 5000; // Pedir datos nuevos cada 5 segundos
 
 // --- TIPOS DE DATOS ---

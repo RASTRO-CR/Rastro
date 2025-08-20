@@ -5,6 +5,7 @@ import { EnhancedRunnerSidebar } from "@/components/enhanced-runner-sidebar"
 import { RaceMetrics } from "@/components/race-metrics"
 import { AlertsPanel } from "@/components/alerts-panel"
 import type { Runner, Alert } from "@/lib/types"
+import { RaceLiveMap } from "./race-live-map"
 
 interface RaceMonitorPageProps {
   runners: Runner[]
@@ -27,7 +28,7 @@ export function RaceMonitorPage({
   routeData,
   connectionState,
   onRunnerSelect,
-  isAdmin = false,
+  isAdmin = true,
 }: RaceMonitorPageProps) {
   const leader =
     runners.length > 0 ? runners.reduce((prev, current) => (prev.progress > current.progress ? prev : current)) : null
@@ -61,9 +62,9 @@ export function RaceMonitorPage({
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 h-[calc(100vh-200px)]">
-          {/* Map - Takes up most space */}
           <div className="xl:col-span-2 slide-in-right">
-            <LiveMap
+
+            <RaceLiveMap
               runners={runners}
               selectedRunner={selectedRunner}
               onRunnerSelect={onRunnerSelect}
@@ -76,7 +77,6 @@ export function RaceMonitorPage({
             <EnhancedRunnerSidebar runners={runners} onRunnerSelect={onRunnerSelect} selectedRunner={selectedRunner} />
           </div>
 
-          {/* Alerts Panel - Only show for admin or if there are critical alerts */}
           {(isAdmin || alerts.some((alert) => alert.severity === "critical")) && (
             <div className="xl:col-span-1 fade-in" style={{ animationDelay: "0.2s" }}>
               <AlertsPanel alerts={alerts} onShowOnMap={onRunnerSelect} />

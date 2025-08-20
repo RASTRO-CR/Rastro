@@ -1,23 +1,21 @@
-import { useState } from "react"
-import { AdminControls } from "@/components/admin-controls"
-import { DetailedStats } from "@/components/detailed-stats"
-import { SystemStatus } from "@/components/system-status"
-import { RaceSettings } from "@/components/race-settings"
-import type { Runner, Alert } from "@/lib/types"
+import { useState } from "react";
+import { AdminControls } from "@/components/admin-controls";
+import { SystemStatus } from "@/components/system-status";
+import type { Runner, Alert } from "@/lib/types";
 
 interface RaceConfigPageProps {
-  runners: Runner[]
-  alerts: Alert[]
-  raceStarted: boolean
-  routeData?: any
+  runners: Runner[];
+  alerts: Alert[];
+  raceStarted: boolean;
+  routeData?: any;
   connectionState: {
-    connected: boolean
-    connectionState: "connecting" | "connected" | "disconnected" | "error"
-    lastUpdate: string | null
-  }
-  onStartRace: () => void
-  onEndRace: () => void
-  onRouteUploaded?: (routeData: any) => void
+    connected: boolean;
+    connectionState: "connecting" | "connected" | "disconnected" | "error";
+    lastUpdate: string | null;
+  };
+  onStartRace: () => void;
+  onEndRace: () => void;
+  onRouteUploaded?: (routeData: any) => void;
 }
 
 export function RaceConfigPage({
@@ -30,14 +28,16 @@ export function RaceConfigPage({
   onEndRace,
   onRouteUploaded,
 }: RaceConfigPageProps) {
-  const [activeTab, setActiveTab] = useState<"controls" | "settings" | "system" | "analytics">("controls")
+  const [activeTab, setActiveTab] = useState<
+    "controls" | "settings" | "system" | "analytics"
+  >("controls");
 
   const tabs = [
     { id: "controls", label: "Race Controls", icon: "🎮" },
-    { id: "settings", label: "Settings", icon: "⚙️" },
+    // { id: "settings", label: "Settings", icon: "⚙️" },
     { id: "system", label: "System Status", icon: "📊" },
-    { id: "analytics", label: "Analytics", icon: "📈" },
-  ]
+    // { id: "analytics", label: "Analytics", icon: "📈" },
+  ];
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -56,20 +56,29 @@ export function RaceConfigPage({
           <div className="glass-card p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gradient mb-2">Race Configuration</h1>
+                <h1 className="text-2xl font-bold text-gradient mb-2">
+                  Race Configuration
+                </h1>
                 <p className="text-gray-400">
-                  Manage race settings, monitor system status, and control race operations
+                  Manage race settings, monitor system status, and control race
+                  operations
                 </p>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-right">
                   <div className="text-sm text-gray-400">Race Status</div>
-                  <div className={`font-semibold ${raceStarted ? "text-emerald-400" : "text-amber-400"}`}>
+                  <div
+                    className={`font-semibold ${
+                      raceStarted ? "text-emerald-400" : "text-amber-400"
+                    }`}
+                  >
                     {raceStarted ? "Active" : "Standby"}
                   </div>
                 </div>
                 <div
-                  className={`w-4 h-4 rounded-full ${raceStarted ? "status-online" : "status-warning"} pulse-glow`}
+                  className={`w-4 h-4 rounded-full ${
+                    raceStarted ? "status-online" : "status-warning"
+                  } pulse-glow`}
                 />
               </div>
             </div>
@@ -113,9 +122,11 @@ export function RaceConfigPage({
             </div>
           )}
 
-          {activeTab === "settings" && (
+          {/* Coming soon... */}
+
+          {/* {activeTab === "settings" && (
             <RaceSettings raceStarted={raceStarted} routeData={routeData} connectionState={connectionState} />
-          )}
+          )} */}
 
           {activeTab === "system" && (
             <SystemStatus
@@ -126,15 +137,17 @@ export function RaceConfigPage({
             />
           )}
 
-          {activeTab === "analytics" && (
+          {/* Coming soon... */}
+
+          {/* {activeTab === "analytics" && (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               <div className="xl:col-span-2">
                 <DetailedStats runners={runners} />
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
-  )
+  );
 }

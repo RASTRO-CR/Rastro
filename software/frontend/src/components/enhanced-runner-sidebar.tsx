@@ -1,36 +1,65 @@
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
-import { Trophy, Zap, Target, Heart, Battery, Signal } from "lucide-react"
-import type { Runner } from "@/lib/types"
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import {
+  Trophy,
+  Zap,
+  Battery,
+  Signal,
+  Compass,
+} from "lucide-react";
+import type { Runner } from "@/lib/types";
 
 interface EnhancedRunnerSidebarProps {
-  runners: Runner[]
-  onRunnerSelect: (runnerId: string) => void
-  selectedRunner: string | null
+  runners: Runner[];
+  onRunnerSelect: (runnerId: string) => void;
+  selectedRunner: string | null;
 }
 
-export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner }: EnhancedRunnerSidebarProps) {
-  const sortedRunners = [...runners].sort((a, b) => b.progress - a.progress)
+export function EnhancedRunnerSidebar({
+  runners,
+  onRunnerSelect,
+  selectedRunner,
+}: EnhancedRunnerSidebarProps) {
+  const sortedRunners = [...runners].sort((a, b) => b.progress - a.progress);
 
   const getPositionBadge = (index: number) => {
-    if (index === 0) return { color: "bg-gradient-to-r from-yellow-400 to-yellow-600", text: "1st", icon: "🥇" }
-    if (index === 1) return { color: "bg-gradient-to-r from-gray-300 to-gray-500", text: "2nd", icon: "🥈" }
-    if (index === 2) return { color: "bg-gradient-to-r from-amber-600 to-amber-800", text: "3rd", icon: "🥉" }
-    return { color: "bg-gradient-to-r from-blue-500 to-purple-600", text: `${index + 1}th`, icon: "" }
-  }
+    if (index === 0)
+      return {
+        color: "bg-gradient-to-r from-yellow-400 to-yellow-600",
+        text: "1st",
+        icon: "🥇",
+      };
+    if (index === 1)
+      return {
+        color: "bg-gradient-to-r from-gray-300 to-gray-500",
+        text: "2nd",
+        icon: "🥈",
+      };
+    if (index === 2)
+      return {
+        color: "bg-gradient-to-r from-amber-600 to-amber-800",
+        text: "3rd",
+        icon: "🥉",
+      };
+    return {
+      color: "bg-gradient-to-r from-blue-500 to-purple-600",
+      text: `${index + 1}th`,
+      icon: "",
+    };
+  };
 
   const getSpeedColor = (speed: number) => {
-    if (speed > 35) return "text-green-400"
-    if (speed > 25) return "text-yellow-400"
-    if (speed > 15) return "text-orange-400"
-    return "text-red-400"
-  }
+    if (speed > 35) return "text-green-400";
+    if (speed > 25) return "text-yellow-400";
+    if (speed > 15) return "text-orange-400";
+    return "text-red-400";
+  };
 
   const getBatteryColor = (level: number) => {
-    if (level > 60) return "text-green-400"
-    if (level > 30) return "text-yellow-400"
-    return "text-red-400"
-  }
+    if (level > 60) return "text-green-400";
+    if (level > 30) return "text-yellow-400";
+    return "text-red-400";
+  };
 
   return (
     <div className="h-full glass-panel p-4 relative overflow-hidden">
@@ -40,7 +69,10 @@ export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner 
           <Trophy className="w-5 h-5 text-yellow-400" />
           <h2 className="text-lg font-semibold text-gradient">Live Rankings</h2>
         </div>
-        <Badge variant="secondary" className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+        <Badge
+          variant="secondary"
+          className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+        >
           {runners.length} Active
         </Badge>
       </div>
@@ -48,11 +80,13 @@ export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner 
       <ScrollArea className="h-[calc(100%-80px)] custom-scrollbar">
         <div className="space-y-3">
           {sortedRunners.map((runner, index) => {
-            const positionBadge = getPositionBadge(index)
-            const isSelected = selectedRunner === runner.id
+            const positionBadge = getPositionBadge(index);
+            const isSelected = selectedRunner === runner.id;
             const timeSinceUpdate = runner.lastUpdate
-              ? Math.floor((Date.now() - new Date(runner.lastUpdate).getTime()) / 1000)
-              : 0
+              ? Math.floor(
+                  (Date.now() - new Date(runner.lastUpdate).getTime()) / 1000
+                )
+              : 0;
 
             return (
               <div
@@ -73,16 +107,30 @@ export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner 
                     <div>
                       <div className="text-white font-semibold flex items-center space-x-2">
                         <span>{runner.name}</span>
-                        {timeSinceUpdate < 10 && <div className="w-2 h-2 bg-green-400 rounded-full pulse-neon" />}
+                        {timeSinceUpdate < 10 && (
+                          <div className="w-2 h-2 bg-green-400 rounded-full pulse-neon" />
+                        )}
                       </div>
-                      <div className="text-gray-400 text-sm">ID: {runner.id}</div>
+                      <div className="text-gray-400 text-sm">
+                        ID: {runner.id}
+                      </div>
                     </div>
                   </div>
 
                   {/* Status Indicators */}
                   <div className="flex items-center space-x-2">
-                    <Signal className={`w-4 h-4 ${timeSinceUpdate < 30 ? "text-green-400" : "text-red-400"}`} />
-                    {runner.batteryLevel && <Battery className={`w-4 h-4 ${getBatteryColor(runner.batteryLevel)}`} />}
+                    <Signal
+                      className={`w-4 h-4 ${
+                        timeSinceUpdate < 30 ? "text-green-400" : "text-red-400"
+                      }`}
+                    />
+                    {runner.batteryLevel && (
+                      <Battery
+                        className={`w-4 h-4 ${getBatteryColor(
+                          runner.batteryLevel
+                        )}`}
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -90,47 +138,65 @@ export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner 
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="glass-panel p-2 rounded-lg">
                     <div className="flex items-center space-x-2">
-                      <Zap className={`w-4 h-4 ${getSpeedColor(runner.speed)}`} />
+                      <Compass className="w-4 h-4 text-blue-400" />
+                      <div>
+                        <div className="text-xs text-gray-400">Latitude</div>
+                        <div className="font-mono font-semibold text-blue-400">
+                          {runner.position.lat.toFixed(4)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {runner.position.lng && (
+                    <div className="glass-panel p-2 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Compass className="w-4 h-4 text-red-400" />
+                        <div>
+                          <div className="text-xs text-gray-400">
+                            Longitude
+                          </div>
+                          <div className="font-mono font-semibold text-red-400">
+                            {runner.position.lng.toFixed(4)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="glass-panel p-2 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <Zap
+                        className={`w-4 h-4 ${getSpeedColor(runner.speed)}`}
+                      />
                       <div>
                         <div className="text-xs text-gray-400">Speed</div>
-                        <div className={`font-mono font-semibold ${getSpeedColor(runner.speed)}`}>
+                        <div
+                          className={`font-mono font-semibold ${getSpeedColor(
+                            runner.speed
+                          )}`}
+                        >
                           {runner.speed.toFixed(1)} km/h
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="glass-panel p-2 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Target className="w-4 h-4 text-blue-400" />
-                      <div>
-                        <div className="text-xs text-gray-400">To Finish</div>
-                        <div className="font-mono font-semibold text-blue-400">
-                          {runner.distanceToFinish.toFixed(1)} km
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {runner.heartRate && (
-                    <div className="glass-panel p-2 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Heart className="w-4 h-4 text-red-400" />
-                        <div>
-                          <div className="text-xs text-gray-400">Heart Rate</div>
-                          <div className="font-mono font-semibold text-red-400">{runner.heartRate} bpm</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {runner.batteryLevel && (
                     <div className="glass-panel p-2 rounded-lg">
                       <div className="flex items-center space-x-2">
-                        <Battery className={`w-4 h-4 ${getBatteryColor(runner.batteryLevel)}`} />
+                        <Battery
+                          className={`w-4 h-4 ${getBatteryColor(
+                            runner.batteryLevel
+                          )}`}
+                        />
                         <div>
                           <div className="text-xs text-gray-400">Battery</div>
-                          <div className={`font-mono font-semibold ${getBatteryColor(runner.batteryLevel)}`}>
+                          <div
+                            className={`font-mono font-semibold ${getBatteryColor(
+                              runner.batteryLevel
+                            )}`}
+                          >
                             {runner.batteryLevel}%
                           </div>
                         </div>
@@ -142,8 +208,10 @@ export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner 
                 {/* Progress Bar */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-300">Race Progress</span>
-                    <span className="text-white font-mono">{runner.progress.toFixed(1)}%</span>
+                    <span className="text-gray-300">Race Progress (Coming Soon)</span>
+                    <span className="text-white font-mono">
+                      {runner.progress.toFixed(1)}%
+                    </span>
                   </div>
                   <div className="progress-neon h-3 bg-gray-700 rounded-full overflow-hidden">
                     <div
@@ -154,12 +222,14 @@ export function EnhancedRunnerSidebar({ runners, onRunnerSelect, selectedRunner 
                 </div>
 
                 {/* Last Update */}
-                <div className="mt-2 text-xs text-gray-500">Updated {timeSinceUpdate}s ago</div>
+                <div className="mt-2 text-xs text-gray-500">
+                  Updated {timeSinceUpdate}s ago
+                </div>
               </div>
-            )
+            );
           })}
         </div>
       </ScrollArea>
     </div>
-  )
+  );
 }

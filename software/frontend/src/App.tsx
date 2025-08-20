@@ -1,150 +1,146 @@
-// import { Routes, Route, Link, useLocation } from "react-router-dom";
-// import LiveTrackingMap from "./components/LiveTrackingMap";
-// import ControlPointsMap from "./components/ControlPointsMap";
-// import "./App.css";
+"use client";
+import { useState, useEffect } from "react";
+import { ModernNavbar } from "@/components/modern-navbar";
+import { RaceMonitorPage } from "@/components/race-monitor-page";
+import { RaceConfigPage } from "@/components/race-config-page";
+import { AdminLogin } from "@/components/admin-login";
+import { mockAlerts } from "@/lib/mock-data";
+import type { Runner, Alert } from "@/lib/types";
+import axios from "axios";
 
-// function App() {
-//   const location = useLocation();
+// URL base de tu API. Asegúrate de que sea accesible desde donde ejecutas el frontend.
+const API_BASE_URL = "http://192.168.100.60:8000";
+const POLLING_INTERVAL_MS = 5000;
 
-//   const getLinkClass = (path: string) => {
-//     return location.pathname === path
-//       ? "bg-sky-500 text-white"
-//       : "bg-gray-700 hover:bg-gray-600";
-//   };
+interface ApiCyclist {
+  id: string;
+  nombre: string;
+  equipo: string;
+  edad: number;
+  lat?: number;
+  lng?: number;
+  spd?: number;
+  timestamp?: string;
+  batteryLevel?: number;
+}
 
-//   return (
-//     <div className="bg-gray-900 text-white h-screen flex flex-col">
-//       <header className="p-4 bg-gray-800 shadow-lg z-10">
-//         <h1 className="text-2xl font-bold text-center mb-4">
-//           RASTRO
-//         </h1>
-//         <nav className="flex justify-center space-x-4">
-//           <Link
-//             to="/"
-//             className={`px-4 py-2 rounded-md font-semibold transition-colors duration-300 ${getLinkClass('/')}`}
-//           >
-//             Seguimiento en Vivo
-//           </Link>
-//           <Link
-//             to="/puntos-de-control"
-//             className={`px-4 py-2 rounded-md font-semibold transition-colors duration-300 ${getLinkClass('/puntos-de-control')}`}
-//           >
-//             Puntos de Control
-//           </Link>
-//         </nav>
-//       </header>
-//       <main className="flex-grow">
-//         <Routes>
-//           <Route path="/" element={<LiveTrackingMap />} />
-//           <Route path="/puntos-de-control" element={<ControlPointsMap />} />
-//         </Routes>
-//       </main>
-//     </div>
-//   );
-// }
+// --- Función para transformar datos del API al formato del Frontend ---
+const transformApiDataToRunner = (cyclists: ApiCyclist[]): Runner[] => {
+  return cyclists.map((cyclist) => {
+    const progress = Math.random() * 100;
+    const distanceToFinish = 85.5 * (1 - progress / 100);
 
-// export default App;
-
-
-"use client"
-
-import { useState, useEffect } from "react"
-import { ModernNavbar } from "@/components/modern-navbar"
-import { RaceMonitorPage } from "@/components/race-monitor-page"
-import { RaceConfigPage } from "@/components/race-config-page"
-import { AdminLogin } from "@/components/admin-login"
-import { useWebSocket } from "@/hooks/use-websocket"
-import { mockRunners, mockAlerts } from "@/lib/mock-data"
-import type { Runner, Alert } from "@/lib/types"
+    return {
+      id: cyclist.id,
+      name: cyclist.nombre,
+      position: {
+        lat: cyclist.lat || 0,
+        lng: cyclist.lng || 0,
+      },
+      speed: cyclist.spd || 0,
+      lastUpdate: cyclist.timestamp || new Date().toISOString(),
+      progress: progress,
+      distanceToFinish: distanceToFinish,
+      heartRate: 150 + Math.floor(Math.random() * 20),
+      batteryLevel: cyclist.batteryLevel || 85,
+    };
+  });
+};
 
 export default function Home() {
-  const [currentPage, setCurrentPage] = useState<"race" | "config">("race")
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [showLogin, setShowLogin] = useState(false)
-  const [selectedRunner, setSelectedRunner] = useState<string | null>(null)
-  const [routeData, setRouteData] = useState<any>(null)
-  const [raceStarted, setRaceStarted] = useState(true)
+  const [currentPage, setCurrentPage] = useState<"race" | "config">("race");
+  const [isAdmin, setIsAdmin] = useState(true);
+  const [selectedRunner, setSelectedRunner] = useState<string | null>(null);
+  const [routeData, setRouteData] = useState<any>(null);
+  const [raceStarted, setRaceStarted] = useState(true);
 
-  // Initialize WebSocket connection
-  const wsData = useWebSocket("wss://localhost:8080/race-data")
+  const [runners, setRunners] = useState<Runner[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts); // Aún usamos mock de alertas
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Merge WebSocket data with mock data for demo
-  const [runners, setRunners] = useState<Runner[]>(mockRunners)
-  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts)
-
-  // Update runners with WebSocket data
   useEffect(() => {
-    if (wsData.runners.length > 0) {
-      setRunners((prev) => {
-        const updated = [...prev]
-        wsData.runners.forEach((wsRunner) => {
-          const index = updated.findIndex((r) => r.id === wsRunner.id)
-          if (index >= 0) {
-            updated[index] = { ...updated[index], ...wsRunner }
-          }
-        })
-        return updated
-      })
-    }
-  }, [wsData.runners])
+    const fetchRunners = async () => {
+      try {
+        const response = await axios.get<{ ciclistas: ApiCyclist[] }>(
+          `${API_BASE_URL}/ciclistas/con-posicion`
+        );
 
-  // Update alerts with WebSocket data
-  useEffect(() => {
-    if (wsData.alerts.length > 0) {
-      setAlerts((prev) => [...wsData.alerts, ...prev].slice(0, 20)) // Keep last 20 alerts
-    }
-  }, [wsData.alerts])
+        console.log("Fetched runner data:", response.data);
 
-  const handleLogin = (username: string, password: string) => {
-    if (username === "admin" && password === "password") {
-      setIsAdmin(true)
-      setShowLogin(false)
-      return true
-    }
-    return false
-  }
+        const transformedRunners = transformApiDataToRunner(
+          response.data.ciclistas
+        );
+        setRunners(transformedRunners);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching runner data:", err);
+        setError(
+          "No se pudo conectar con el servidor para obtener los datos de los corredores."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const handleLogout = () => {
-    setIsAdmin(false)
-    setCurrentPage("race")
-  }
+    // Primera llamada inmediata
+    fetchRunners();
 
-  const handleAdminAccess = () => {
-    setShowLogin(true)
-  }
+    // Configurar el intervalo para repetir la llamada
+    const intervalId = setInterval(fetchRunners, POLLING_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleStartRace = () => {
     if (routeData) {
-      setRaceStarted(true)
-      wsData.sendMessage("race_control", { action: "start", routeData })
+      setRaceStarted(true);
     }
-  }
+  };
 
   const handleEndRace = () => {
-    setRaceStarted(false)
-    wsData.sendMessage("race_control", { action: "end" })
-  }
+    setRaceStarted(false);
+  };
 
   const handleRunnerSelect = (runnerId: string) => {
-    setSelectedRunner(runnerId)
-  }
+    setSelectedRunner(runnerId);
+  };
 
   const handleRouteUploaded = (newRouteData: any) => {
-    setRouteData(newRouteData)
-    wsData.sendMessage("route_upload", newRouteData)
+    setRouteData(newRouteData);
+  };
+
+  const unreadAlerts = alerts.filter((alert) => !alert.resolved).length;
+
+  if (isLoading) {
+    // --- PANTALLA DE CARGA INICIAL ---
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-white">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <h2 className="text-xl font-semibold">Conectando al servidor...</h2>
+          <p className="text-gray-400">
+            Obteniendo datos de la carrera en tiempo real.
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  const connectionState = {
-    connected: wsData.connected,
-    connectionState: wsData.connectionState,
-    lastUpdate: wsData.lastUpdate,
+  if (error) {
+    // --- PANTALLA DE ERROR ---
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-white">
+        <div className="text-center bg-red-900/50 border border-red-500 p-8 rounded-lg">
+          <h2 className="text-xl font-semibold text-red-400">
+            Error de Conexión
+          </h2>
+          <p className="text-gray-300 mt-2">{error}</p>
+        </div>
+      </div>
+    );
   }
 
-  const unreadAlerts = alerts.filter((alert) => !alert.resolved).length
-
-  if (showLogin) {
-    return <AdminLogin onLogin={handleLogin} onBack={() => setShowLogin(false)} />
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,11 +148,9 @@ export default function Home() {
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         isAdmin={isAdmin}
-        connectionStatus={connectionState}
+        connectionStatus={{ connected: !error, connectionState: error ? 'error' : 'connected' }}
         activeRunners={runners.length}
         unreadAlerts={unreadAlerts}
-        onLogout={handleLogout}
-        onAdminAccess={handleAdminAccess}
       />
 
       {currentPage === "race" ? (
@@ -165,7 +159,7 @@ export default function Home() {
           alerts={alerts}
           selectedRunner={selectedRunner}
           routeData={routeData}
-          connectionState={connectionState}
+          connectionState={{ connected: !error, connectionState: error ? 'error' : 'connected', lastUpdate: new Date().toLocaleTimeString() }}
           onRunnerSelect={handleRunnerSelect}
           isAdmin={isAdmin}
         />
@@ -175,12 +169,12 @@ export default function Home() {
           alerts={alerts}
           raceStarted={raceStarted}
           routeData={routeData}
-          connectionState={connectionState}
+          connectionState={{ connected: !error, connectionState: error ? 'error' : 'connected', lastUpdate: new Date().toLocaleTimeString() }}
           onStartRace={handleStartRace}
           onEndRace={handleEndRace}
           onRouteUploaded={handleRouteUploaded}
         />
       )}
     </div>
-  )
+  );
 }
