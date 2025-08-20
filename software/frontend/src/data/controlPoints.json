@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1,
+    "lugar": "9:02am - APT",
+    "modulo_cc": [9.93631, -84.0392],
+    "modulo_corredor": [9.9364, -84.0390],
+    "google_maps": [9.936248, -84.039279]
+  },
+  {
+    "id": 2,
+    "lugar": "9:06am - Primera interseccion",
+    "modulo_cc": [9.937057, -84.038338],
+    "modulo_corredor": [9.9371, -84.0383],
+    "google_maps": [9.937057, -84.038287]
+  },
+  {
+    "id": 3,
+    "lugar": "9:08am - Floristeria",
+    "modulo_cc": [9.9372, -84.03825],
+    "modulo_corredor": [9.9373, -84.0382],
+    "google_maps": [9.937508, -84.038067]
+  },
+  {
+    "id": 4,
+    "lugar": "9:10am - Floristeria 2",
+    "modulo_cc": [9.9374, -84.03815],
+    "modulo_corredor": [9.9373, -84.0382],
+    "google_maps": [9.937590, -84.038040]
+  },
+  {
+    "id": 5,
+    "lugar": "9:12am - Super Centro",
+    "modulo_cc": [9.9378, -84.038071],
+    "modulo_corredor": [9.9377, -84.0380],
+    "google_maps": [9.937702, -84.038002]
+  },
+  {
+    "id": 6,
+    "lugar": "9:13am - Si MART tienda de conveniencia",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9383, -84.0378],
+    "google_maps": [9.938472, -84.037668]
+  },
+  {
+    "id": 7,
+    "lugar": "9:17am - Laboratorio emma gamboa",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9393, -84.0367],
+    "google_maps": [9.939069, -84.037076]
+  },
+  {
+    "id": 8,
+    "lugar": "9:19am - Bar Rest Marinos",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9404, -84.0354],
+    "google_maps": [9.940487, -84.035348]
+  },
+  {
+    "id": 9,
+    "lugar": "9:23am - Condominio Ayarco",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9405, -84.0340],
+    "google_maps": [9.940619, -84.034004]
+  },
+  {
+    "id": 10,
+    "lugar": "9:26am - Peri",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9386, -84.0342],
+    "google_maps": [9.938517, -84.034195]
+  },
+  {
+    "id": 11,
+    "lugar": "9:28am - Chicago Bar Rest",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9383, -84.0343],
+    "google_maps": [9.938248, -84.034414]
+  },
+  {
+    "id": 12,
+    "lugar": "9:31am - Ferreteria Segura",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9377, -84.0359],
+    "google_maps": [9.937556, -84.035946]
+  },
+  {
+    "id": 13,
+    "lugar": "9:34am - La Chocolatin",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9371, -84.0376],
+    "google_maps": [9.937122, -84.037634]
+  },
+  {
+    "id": 14,
+    "lugar": "9:36am - Food Campus",
+    "modulo_cc": [9.93767, -84.038002],
+    "modulo_corredor": [9.9370, -84.0383],
+    "google_maps": [9.936994, -84.038387]
+  },
+  {
+    "id": 15,
+    "lugar": "9:41am - Super Napoli",
+    "modulo_cc": [9.936143, -84.039505],
+    "modulo_corredor": [9.9361, -84.0395],
+    "google_maps": [9.936204, -84.039589]
+  },
+  {
+    "id": 16,
+    "lugar": "9:45am - Parqueo APT",
+    "modulo_cc": [9.936028, -84.039742],
+    "modulo_corredor": [9.9362, -84.0393],
+    "google_maps": [9.936240, -84.039280]
+  }
+]
