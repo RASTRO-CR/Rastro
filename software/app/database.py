@@ -1,7 +1,8 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
+import os
 
-MONGO_URI = "mongodb+srv://admin:admin@rastro.oj43vvt.mongodb.net/?retryWrites=true&w=majority&appName=Rastro"
+MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "ciclismo"
 
 client = AsyncIOMotorClient(MONGO_URI)

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from database import db
 from schemas import TelemetriaBase
 import models
+import alert_engine
 
 router = APIRouter(prefix="/datos", tags=["Telemetría"])
 
@@ -36,6 +37,8 @@ async def recibir_datos(data: dict):
         gyro_z=data.get("gyro_z"),
         battery=data.get("battery"),
     )
+
+    await alert_engine.verificar_alertas(ciclista_id)
 
     return {"status": "ok", "msg": "Datos recibidos y almacenados"}
 

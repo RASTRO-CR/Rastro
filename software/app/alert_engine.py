@@ -1,10 +1,12 @@
 import models, llm_utils
+from services.llm.analisis_llm import analizar_riesgo
+
 
 ACCEL_UMBRAL = 15  # m/s², vibración muy alta
 GYRO_UMBRAL = 300  # deg/s, inclinación peligrosa
 VEL_CERO_TIEMPO = 10  # s
 
-def verificar_alertas(ciclista_id):
+async def verificar_alertas(ciclista_id):
     dato = models.obtener_ultimo_dato(ciclista_id)
     if dato is None:
         return None
