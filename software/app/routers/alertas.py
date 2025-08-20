@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 from database import db
-from schemas import Alerta
+from schemas import AlertaBase
 
 router = APIRouter(prefix="/alertas", tags=["Alertas"])
 
 @router.post("/")
-async def crear_alerta(a: Alerta):
+async def crear_alerta(a: AlertaBase):
     result = await db["alertas"].insert_one(a.dict())
     return {"id": str(result.inserted_id)}
 

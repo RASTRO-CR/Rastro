@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from database import db
-from schemas import Telemetria
+from schemas import TelemetriaBase
 import models
 
 router = APIRouter(prefix="/datos", tags=["Telemetría"])
@@ -12,6 +12,8 @@ async def recibir_datos(data: dict):
     if not ciclista_id:
         raise HTTPException(status_code=400, detail="ciclista_id es requerido")
 
+    print (data)
+    print ("Data lat: ", data.get("lat"))
     # Crear ciclista si no existe
     ciclista = {
         "id": ciclista_id,
@@ -19,7 +21,9 @@ async def recibir_datos(data: dict):
         "edad": data.get("edad", 0),
         "equipo": data.get("equipo", "N/A")
     }
-    await models.agregar_ciclista(ciclista)
+
+    print("Ciclista agregado test:", ciclista)
+    await models.agregar_ciclista(ciclista_id,data.get("nombre", "Desconocido"),data.get("edad", 0),data.get("equipo", "N/A"))
 
     # Insertar telemetría
     dato = await models.insertar_datos(
@@ -35,8 +39,7 @@ async def recibir_datos(data: dict):
         gyro_z=data.get("gyro_z"),
     )
 
-    return {"status": "ok", "msg": "Datos recibidos y almacenados", "dato": dato}
-
+    return {"status": "ok", "msg": "Datos recibidos y almacenados"}
 
 # Obtener último dato de un ciclista
 @router.get("/{ciclista_id}")

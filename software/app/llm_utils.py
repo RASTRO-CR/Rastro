@@ -6,7 +6,6 @@ client = Together(api_key="b0bc9e204308622a15218f0fea7225304d106f7df146fff09eef9
 # Puedes cambiar de modelo según necesidad
 MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo"
 
-prompt = "Cuales las competencias de ciclismo más reconocidas a nivel mundial"
 
 def consultar_llm(prompt):
     try:
@@ -22,6 +21,3 @@ def consultar_llm(prompt):
         return f"Error en LLM: {e}"
 
     
-
-result = consultar_llm(prompt)
-print(result)

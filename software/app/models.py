@@ -177,7 +177,6 @@ async def listar_ciclistas():
 async def insertar_datos(ciclista_id, lat, lng, spd, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z):
     dato = {
         "ciclista_id": ciclista_id,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
         "lat": lat,
         "lng": lng,
         "spd": spd,
@@ -188,6 +187,7 @@ async def insertar_datos(ciclista_id, lat, lng, spd, accel_x, accel_y, accel_z, 
         "gyro_y": gyro_y,
         "gyro_z": gyro_z
     }
+    print("datos insertados test:", dato)
     await db.telemetria.insert_one(dato)
     return dato
 
@@ -198,7 +198,7 @@ async def insertar_datos_telemetria(data: dict):
 async def obtener_ultimo_dato(ciclista_id: str):
     dato = await db.telemetria.find_one(
         {"ciclista_id": ciclista_id},
-        sort=[("timestamp", -1)],
+        sort=[("_id", -1)],
         projection={"_id": 0}
     )
     return dato

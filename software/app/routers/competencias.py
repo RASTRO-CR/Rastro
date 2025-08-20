@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from database import db
-from schemas import Competencia
+from schemas import CompetenciaBase
 
 router = APIRouter(prefix="/competencias", tags=["Competencias"])
 
 @router.post("/")
-async def crear_competencia(c: Competencia):
+async def crear_competencia(c: CompetenciaBase):
     result = await db["competencias"].insert_one(c.dict())
     return {"id": str(result.inserted_id)}
 

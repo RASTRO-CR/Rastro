@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
-from schemas import Ciclista
+from schemas import CiclistaBase
 import models
 
 router = APIRouter(prefix="/ciclistas", tags=["Ciclistas"])
 
 @router.post("/")
-async def crear_ciclista(c: Ciclista):
+async def crear_ciclista(c: CiclistaBase):
     ciclista = await models.agregar_ciclista(c.dict())
     return {"status": "ok", "ciclista": ciclista}
 
