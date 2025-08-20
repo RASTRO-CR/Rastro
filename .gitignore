@@ -99,3 +99,6 @@ venv.bak/
 .mypy_cache/
 
 .idea/*
+
+
+!/software/frontend/src/lib
