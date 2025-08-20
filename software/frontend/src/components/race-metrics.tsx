@@ -33,6 +33,8 @@ export function RaceMetrics({
     return connectionState.connected ? Wifi : WifiOff;
   };
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
   const [liveCommentary, setLiveCommentary] = useState(
     "Selecciona un tipo de análisis"
   );
@@ -55,12 +57,8 @@ export function RaceMetrics({
   const handleAnalysisChange = async (value: string) => {
     setLoading(true);
     try {
-      // const res = await fetch(
-      //   `${process.env.VITE_APP_API_URL}/analisis/${value}`
-      // );
-
       const res = await fetch(
-        `http://192.168.100.60:8000/analisis/${value}`
+        `${API_BASE_URL}/analisis/${value}`
       );
       const data = await res.json();
       setLiveCommentary("Comentario tecnico de " + data.ciclista_id + ": " + data.comentario_tecnico || "No se recibió respuesta");
@@ -101,7 +99,7 @@ export function RaceMetrics({
             <Clock className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
-            <div className="text-sm text-gray-400 mb-1">Elapsed Time</div>
+            <div className="text-sm text-gray-400 mb-1">Elapsed Time (Coming Soon)</div>
             <div className="font-mono font-semibold text-white text-lg">
               {timeElapsed}
             </div>

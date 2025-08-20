@@ -3,13 +3,16 @@ import { useState, useEffect } from "react";
 import { ModernNavbar } from "@/components/modern-navbar";
 import { RaceMonitorPage } from "@/components/race-monitor-page";
 import { RaceConfigPage } from "@/components/race-config-page";
-import { AdminLogin } from "@/components/admin-login";
-import { mockAlerts } from "@/lib/mock-data";
 import type { Runner, Alert } from "@/lib/types";
 import axios from "axios";
+import {
+  calculateRunnerProgress,
+  getAccumulatedDistances,
+} from "@/lib/gpxUtils"; // <-- IMPORTAR
 
 // URL base de tu API. Asegúrate de que sea accesible desde donde ejecutas el frontend.
-const API_BASE_URL = "http://192.168.100.60:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const POLLING_INTERVAL_MS = 5000;
 
 interface ApiCyclist {
@@ -25,10 +28,28 @@ interface ApiCyclist {
 }
 
 // --- Función para transformar datos del API al formato del Frontend ---
-const transformApiDataToRunner = (cyclists: ApiCyclist[]): Runner[] => {
+const transformApiDataToRunner = (
+  cyclists: ApiCyclist[],
+  routeData: {
+    coordinates: [number, number][];
+    accumulatedDistances: number[];
+    distance: number;
+  } | null
+): Runner[] => {
   return cyclists.map((cyclist) => {
-    const progress = Math.random() * 100;
-    const distanceToFinish = 85.5 * (1 - progress / 100);
+    let progress = 0;
+    let distanceToFinish = routeData ? routeData.distance : 0;
+
+    if (routeData && cyclist.lat && cyclist.lng) {
+      const { progress: calculatedProgress, distanceCovered } =
+        calculateRunnerProgress(
+          { lat: cyclist.lat, lng: cyclist.lng },
+          routeData.coordinates,
+          routeData.accumulatedDistances
+        );
+      progress = calculatedProgress;
+      distanceToFinish = routeData.distance - distanceCovered;
+    }
 
     return {
       id: cyclist.id,
@@ -40,7 +61,7 @@ const transformApiDataToRunner = (cyclists: ApiCyclist[]): Runner[] => {
       speed: cyclist.spd || 0,
       lastUpdate: cyclist.timestamp || new Date().toISOString(),
       progress: progress,
-      distanceToFinish: distanceToFinish,
+      distanceToFinish: Math.max(0, distanceToFinish),
       heartRate: 150 + Math.floor(Math.random() * 20),
       batteryLevel: cyclist.batteryLevel || 85,
     };
@@ -55,7 +76,7 @@ export default function Home() {
   const [raceStarted, setRaceStarted] = useState(true);
 
   const [runners, setRunners] = useState<Runner[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts); // Aún usamos mock de alertas
+  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +90,8 @@ export default function Home() {
         console.log("Fetched runner data:", response.data);
 
         const transformedRunners = transformApiDataToRunner(
-          response.data.ciclistas
+          response.data.ciclistas,
+          routeData
         );
         setRunners(transformedRunners);
         setError(null);
@@ -90,6 +112,22 @@ export default function Home() {
     const intervalId = setInterval(fetchRunners, POLLING_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
+  }, [routeData]);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const response = await axios.get<Alert[]>(`${API_BASE_URL}/alertas/`);
+        setAlerts(response.data);
+      } catch (err) {
+        console.error("Error fetching alerts:", err);
+      }
+    };
+
+    fetchAlerts();
+    const intervalId = setInterval(fetchAlerts, POLLING_INTERVAL_MS + 2000); // Un poco más lento que los corredores
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleStartRace = () => {
@@ -107,7 +145,10 @@ export default function Home() {
   };
 
   const handleRouteUploaded = (newRouteData: any) => {
-    setRouteData(newRouteData);
+    const accumulatedDistances = getAccumulatedDistances(
+      newRouteData.coordinates
+    );
+    setRouteData({ ...newRouteData, accumulatedDistances });
   };
 
   const unreadAlerts = alerts.filter((alert) => !alert.resolved).length;
@@ -141,14 +182,16 @@ export default function Home() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-background">
       <ModernNavbar
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         isAdmin={isAdmin}
-        connectionStatus={{ connected: !error, connectionState: error ? 'error' : 'connected' }}
+        connectionStatus={{
+          connected: !error,
+          connectionState: error ? "error" : "connected",
+        }}
         activeRunners={runners.length}
         unreadAlerts={unreadAlerts}
       />
@@ -159,7 +202,11 @@ export default function Home() {
           alerts={alerts}
           selectedRunner={selectedRunner}
           routeData={routeData}
-          connectionState={{ connected: !error, connectionState: error ? 'error' : 'connected', lastUpdate: new Date().toLocaleTimeString() }}
+          connectionState={{
+            connected: !error,
+            connectionState: error ? "error" : "connected",
+            lastUpdate: new Date().toLocaleTimeString(),
+          }}
           onRunnerSelect={handleRunnerSelect}
           isAdmin={isAdmin}
         />
@@ -169,7 +216,11 @@ export default function Home() {
           alerts={alerts}
           raceStarted={raceStarted}
           routeData={routeData}
-          connectionState={{ connected: !error, connectionState: error ? 'error' : 'connected', lastUpdate: new Date().toLocaleTimeString() }}
+          connectionState={{
+            connected: !error,
+            connectionState: error ? "error" : "connected",
+            lastUpdate: new Date().toLocaleTimeString(),
+          }}
           onStartRace={handleStartRace}
           onEndRace={handleEndRace}
           onRouteUploaded={handleRouteUploaded}
