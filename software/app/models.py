@@ -174,7 +174,7 @@ async def listar_ciclistas():
 # =====================
 # TELEMETRÍA
 # =====================
-async def insertar_datos(ciclista_id, lat, lng, spd, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z):
+async def insertar_datos(ciclista_id, lat, lng, spd, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, battery):
     dato = {
         "ciclista_id": ciclista_id,
         "lat": lat,
@@ -185,7 +185,8 @@ async def insertar_datos(ciclista_id, lat, lng, spd, accel_x, accel_y, accel_z, 
         "accel_z": accel_z,
         "gyro_x": gyro_x,
         "gyro_y": gyro_y,
-        "gyro_z": gyro_z
+        "gyro_z": gyro_z,
+        "battery": battery,
     }
     print("datos insertados test:", dato)
     await db.telemetria.insert_one(dato)
@@ -201,13 +202,14 @@ async def obtener_ultimo_dato(ciclista_id: str):
         sort=[("_id", -1)],
         projection={"_id": 0}
     )
+    print("Último dato:", dato)
     return dato
 
-async def obtener_datos_ciclista(ciclista_id: str, limit: int = 50):
+async def obtener_datos_ciclista(ciclista_id: str, limit: int = 5):
     return await db.telemetria.find(
         {"ciclista_id": ciclista_id},
         {"_id": 0}
-    ).sort("timestamp", -1).to_list(limit)
+    ).sort("_id", -1).to_list(limit)
 
 
 async def obtener_todos_ciclistas_con_ultima_posicion():
@@ -223,6 +225,7 @@ async def obtener_todos_ciclistas_con_ultima_posicion():
                 "lng": ultimo.get("lng"),
                 "spd": ultimo.get("spd"),
                 "timestamp": ultimo.get("timestamp"),
+                "battery": ultimo.get("battery"),
             })
         result.append(c)
     return result

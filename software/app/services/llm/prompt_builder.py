@@ -1,7 +1,7 @@
 #Falta adaptar los prompts a un contexto más funcional, como tener un formato de datos por kilometros o similar.
 
 
-def format_datos_tabla(datos_list):
+async def format_datos_tabla(datos_list):
     tabla = "timestamp,lat,lng,spd,accel_x,accel_y,accel_z\\n"
     for row in datos_list:
         tabla += f"{row['timestamp']},{row['lat']},{row['lng']},{row['speed']},{row['accel_x']},{row['accel_y']},{row['accel_z']}\\n"

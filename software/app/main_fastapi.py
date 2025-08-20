@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import analisis
 import models, llm_utils, alert_engine
 # from schemas import AnalisisRequest
 import uvicorn
@@ -26,7 +27,7 @@ app.include_router(competencias.router)
 app.include_router(telemetria.router)
 # app.include_router(alertas.router)
 # app.include_router(resumenes.router)
-# app.include_router(analisis.router)   # aquí van tus endpoints de LLM
+app.include_router(analisis.router)   # aquí van tus endpoints de LLM
 
 # app.add_middleware(
 #     CORSMiddleware,

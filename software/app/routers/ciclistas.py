@@ -18,5 +18,7 @@ async def listar_ciclistas():
 async def listar_ciclistas_con_posicion():
     ciclistas_con_posicion = await models.obtener_todos_ciclistas_con_ultima_posicion()
     # Filtramos solo los que tengan lat/lng
+    print("Ciclistas con posición:", ciclistas_con_posicion)
     ciclistas_validos = [c for c in ciclistas_con_posicion if c.get("lat") and c.get("lng")]
+    print("Ciclistas con posición:", ciclistas_validos)
     return {"ciclistas": ciclistas_validos}

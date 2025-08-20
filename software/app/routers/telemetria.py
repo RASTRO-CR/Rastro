@@ -12,8 +12,6 @@ async def recibir_datos(data: dict):
     if not ciclista_id:
         raise HTTPException(status_code=400, detail="ciclista_id es requerido")
 
-    print (data)
-    print ("Data lat: ", data.get("lat"))
     # Crear ciclista si no existe
     ciclista = {
         "id": ciclista_id,
@@ -22,7 +20,6 @@ async def recibir_datos(data: dict):
         "equipo": data.get("equipo", "N/A")
     }
 
-    print("Ciclista agregado test:", ciclista)
     await models.agregar_ciclista(ciclista_id,data.get("nombre", "Desconocido"),data.get("edad", 0),data.get("equipo", "N/A"))
 
     # Insertar telemetría
@@ -37,6 +34,7 @@ async def recibir_datos(data: dict):
         gyro_x=data.get("gyro_x"),
         gyro_y=data.get("gyro_y"),
         gyro_z=data.get("gyro_z"),
+        battery=data.get("battery"),
     )
 
     return {"status": "ok", "msg": "Datos recibidos y almacenados"}
