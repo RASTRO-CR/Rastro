@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include <RadioLib.h>
 #include <WiFi.h>
@@ -6,11 +5,8 @@
 #include <ArduinoJson.h>
 
 // --- Credenciales y Endpoints ---
-// const char* ssid = "Apart. Brisas del Este AP1";
 const char* ssid = "Wifi Montoya";
-// const char* password = "monica789";
 const char* password = "8A8960WM59";
-// const char* backendUrl = "http://192.168.60.24:8000/datos/";
 const char* backendUrl = "http://192.168.100.60:8000/datos/";
 
 // --- PINES ESP32 ---
@@ -33,19 +29,21 @@ struct RastroData {
     uint32_t timestamp;   // 4 bytes
     int32_t latitude;     // 4 bytes
     int32_t longitude;    // 4 bytes
-    uint16_t battery_mv;  // 2 bytes
+    uint16_t battery;  // 2 bytes
     uint16_t speed_cmps;  // 2 bytes
     uint8_t satellites;   // 1 byte
     uint8_t hdop_x10;     // 1 byte
     int16_t accel_x;      // 2 bytes
     int16_t accel_y;      // 2 bytes
     int16_t accel_z;      // 2 bytes
+    int16_t gyro_x;       // 2 bytes
+    int16_t gyro_y;       // 2 bytes
+    int16_t gyro_z;       // 2 bytes
     uint8_t racer_id;    // 1 byte
     uint8_t flags;        // 1 byte
 };
 
 // --- Función para controlar el LED RGB ---
-// Usa PWM para poder controlar el brillo y crear efectos
 void setLedColor(int r, int g, int b) {
     ledcWrite(0, r); // Canal 0 para Rojo
     ledcWrite(1, g); // Canal 1 para Verde
@@ -54,7 +52,7 @@ void setLedColor(int r, int g, int b) {
 
 void setup() {
     Serial.begin(115200);
-    while (!Serial && millis() < 2000); // Esperar por el monitor serie
+    while (!Serial && millis() < 2000);
     Serial.println("\n--- MÓDULO CC RASTRO v1.5 ---");
 
     // --- Configuración de pines para LED y Botón ---
@@ -95,13 +93,11 @@ void loop() {
     float breath = (exp(sin(millis()/2000.0*PI)) - 0.36787944)*108.0;
     setLedColor(0, (int)breath, 0); // LED verde "respirando"
 
-    // 1. Crear un "molde" vacío para recibir los datos
     RastroData dataPacket;
 
-    // 2. Intentar leer los bytes entrantes y meterlos en el molde
     int state = radio.readData((uint8_t*)&dataPacket, sizeof(dataPacket));
 
-    if (state == RADIOLIB_ERR_NONE) {
+    if (state == RADIOLIB_ERR_NONE && dataPacket.racer_id == 1) {
         setLedColor(255, 255, 255); // Destello blanco al recibir
         Serial.printf("Paquete binario recibido de ciclista #%d\n", dataPacket.racer_id);
 
@@ -113,10 +109,11 @@ void loop() {
         float accelX = dataPacket.accel_x / 1000.0;
         float accelY = dataPacket.accel_y / 1000.0;
         float accelZ = dataPacket.accel_z / 1000.0;
-        float battery = dataPacket.battery_mv / 1000.0;
-        float gyro_x = 0;        // 4 bytes
-        float gyro_y = 0;        // 4 bytes
-        float gyro_z = 0;      // 4 bytes
+        float gyro_x = dataPacket.gyro_x / 1000.0;
+        float gyro_y = dataPacket.gyro_y / 1000.0;
+        float gyro_z = dataPacket.gyro_z / 1000.0;
+        float battery = dataPacket.battery;
+
         // Serial debug opcional
         Serial.printf("  Lat: %.6f, Lng: %.6f, Vel: %.2f m/s\n", lat, lng, speed);
 
@@ -132,18 +129,13 @@ void loop() {
         jsonDoc["gyro_x"] = gyro_x;
         jsonDoc["gyro_y"] = gyro_y;
         jsonDoc["gyro_z"] = gyro_z; 
-        // jsonDoc["battery"] = battery;
-        // jsonDoc["hdop"] = hdop;
-        // jsonDoc["satellites"] = dataPacket.satellites;
-        // jsonDoc["timestamp"] = dataPacket.timestamp;
+        jsonDoc["battery"] = battery;
     
         String jsonPayload;
-        serializeJson(jsonDoc, jsonPayload); // Convertir el documento a un String
-
+        serializeJson(jsonDoc, jsonPayload);
         Serial.println("Enviando JSON al backend:");
         Serial.println(jsonPayload);
 
-        // 4. Enviar el JSON al servidor
         if (WiFi.status() == WL_CONNECTED) {
             HTTPClient http;
             http.begin(backendUrl);
@@ -166,36 +158,8 @@ void loop() {
         delay(100); // Pequeña pausa después del destello
 
     } else if (state != RADIOLIB_ERR_RX_TIMEOUT) {
-        // Ignoramos los timeouts (cuando no llega nada), pero mostramos otros errores.
         Serial.printf("Fallo al recibir, código: %d\n", state);
     }
 
-    delay(1000); // Esperar 1 segundo antes de la siguiente iteración
+    delay(1000);
 }
-
-
-// #include <Arduino.h>
-
-// // El pin ADC que usaremos en la IdeaBoard
-// const int VOLTAGE_PIN = 33; // <-- ¡ÚNICO CAMBIO!
-
-// void setup() {
-//   Serial.begin(115200);
-//   while (!Serial && millis() < 2000);
-//   Serial.println("\n--- Voltímetro con IdeaBoard ---");
-//   Serial.println("Ajusta el tornillo del MT3608 hasta que el voltaje sea 5.10V");
-  
-//   analogReadResolution(12);
-// }
-
-// void loop() {
-//   int adcValue = analogRead(VOLTAGE_PIN);
-//   float pinVoltage = adcValue * (3.3 / 4095.0);
-//   float realVoltage = pinVoltage * 2;
-  
-//   Serial.print("Voltaje de salida del Booster: ");
-//   Serial.print(realVoltage);
-//   Serial.println(" V");
-  
-//   delay(500);
-// }
