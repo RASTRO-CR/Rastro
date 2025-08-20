@@ -40,6 +40,9 @@ struct RastroData {
     int16_t accel_x;      // Acelerómetro X (mg) (2 bytes)
     int16_t accel_y;      // Acelerómetro Y (mg) (2 bytes)
     int16_t accel_z;      // Acelerómetro Z (mg) (2 bytes)
+    int16_t gyro_x;       // Giroscopio X (mdeg/s) (2 bytes)
+    int16_t gyro_y;       // Giroscopio Y (mdeg/s) (2 bytes)
+    int16_t gyro_z;       // Giroscopio Z (mdeg/s) (2 bytes)
     uint8_t racer_id;    // ID de corredor (1 byte)
     uint8_t flags;        // Bitmask: 0x1=Caída, 0x2=Carga (1 byte)
 };

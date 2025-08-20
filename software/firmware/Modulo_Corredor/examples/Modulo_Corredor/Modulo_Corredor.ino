@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include "LoRaBoards.h"
 #include <TinyGPS++.h>
@@ -19,7 +18,6 @@ int counter = 0;
 
 void setup()
 {
-    // setupBoards() es la función mágica del fabricante.
     Serial.println("¡Transmisor listo!");
     setupBoards();
 
@@ -35,14 +33,9 @@ void setup()
     u8g2->sendBuffer();
     delay(1500);
 
-    // --- INICIALIZACIÓN DEL IMU (QMI8658) - CORREGIDO ---
-    // El IMU comparte el bus SPI con la tarjeta SD.
-    // Primero, nos aseguramos de que el Chip Select (CS) de la SD esté desactivado (en ALTO).
     pinMode(SPI_CS, OUTPUT);
     digitalWrite(SPI_CS, HIGH);
 
-    // Ahora, inicializamos el IMU pasándole el bus SPI correcto (SDCardSPI),
-    // que está definido en los archivos del fabricante.
     if (!qmi.begin(IMU_CS, -1, -1, -1, SDCardSPI)) {
         Serial.println("Fallo crítico: IMU QMI8658 no encontrado. Deteniendo.");
         u8g2->clearBuffer();
@@ -95,7 +88,7 @@ void loop()
 
     // --- ACTUALIZACIÓN DE PANTALLA Y SERIAL (a una frecuencia más baja) ---
     static uint32_t lastDisplay = 0;
-    if (millis() - lastDisplay > 500) { // Actualizar 2 veces por segundo
+    if (millis() - lastDisplay > 500) {
         lastDisplay = millis();
         
         float roll = filter.getRoll();
@@ -109,14 +102,17 @@ void loop()
         data.timestamp = millis();
         data.latitude = gps.location.lat() * 1E7;  // Convert to 1E7 precision
         data.longitude = gps.location.lng() * 1E7; // Convert to 1E7 precision
-        data.battery_mv = PMU->getBatteryPercent() * 10; // Assuming getBatteryPercent returns 0-100%
-        data.speed_cmps = gps.speed.kmph() * 1000 / 3600; // Convert speed to cm/s
+        data.battery_mv = PMU->getBatteryPercent(); // Assuming getBatteryPercent returns 0-100%
+        data.speed_cmps = gps.speed.kmph();
         data.satellites = gps.satellites.value();
         data.hdop_x10 = gps.hdop.hdop() * 10;
         data.accel_x = acc.x * 1000; // Convert to milli-g
         data.accel_y = acc.y * 1000; // Convert to milli-g
         data.accel_z = acc.z * 1000; // Convert to milli-g
-        data.racer_id = 1;  // Set racer ID
+        data.gyro_x = gyr.x * 1000; // Convert to milli-degrees/s
+        data.gyro_y = gyr.y * 1000; // Convert to milli-degrees/s
+        data.gyro_z = gyr.z * 1000; // Convert to milli-degrees/s
+        data.racer_id = 2;  // Set racer ID
         data.flags = 0;      // Set flags
 
         // Imprimir en el Monitor Serie todos los datos de telemetría
@@ -129,8 +125,8 @@ void loop()
         // Imprimir en la Pantalla OLED
         u8g2->clearBuffer();
         u8g2->setFont(u8g2_font_profont12_tf);
-        
-        sprintf(buffer, "SAT:%d HDOP:%.1f", gps.satellites.value(), gps.hdop.hdop());
+
+        sprintf(buffer, "SAT:%d BAT:%d%%", gps.satellites.value(), PMU->getBatteryPercent());
         u8g2->drawStr(0, 12, buffer);
 
         sprintf(buffer, "LAT: %.4f", gps.location.lat());
@@ -138,19 +134,15 @@ void loop()
 
         sprintf(buffer, "LNG: %.4f", gps.location.lng());
         u8g2->drawStr(0, 44, buffer);
-        
-        sprintf(buffer, "YAW: %.1f", yaw);
+
+        sprintf(buffer, "SPD: %.2f", gps.speed.kmph());
         u8g2->drawStr(0, 60, buffer);
 
         u8g2->sendBuffer();
 
-        // Send telemetry data via LoRa
         Serial.print("Enviando paquete binario #");
         Serial.println(counter);
 
-        // --- PASO 3: Transmitir la estructura como un bloque de bytes ---
-        // Le decimos a RadioLib que tome el "molde" (dataPacket),
-        // lo trate como una secuencia de bytes, y envíe tantos bytes como el tamaño del molde.
         int state = radio.transmit((uint8_t*)&data, sizeof(data));
 
         if (state == RADIOLIB_ERR_NONE) {
