@@ -1,5 +1,3 @@
-import type { Runner } from "./types";
-
 function getDistance(p1: [number, number], p2: [number, number]): number {
   const R = 6371; // Radio de la Tierra en km
   const dLat = (p2[0] - p1[0]) * (Math.PI / 180);
